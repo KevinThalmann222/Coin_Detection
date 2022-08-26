@@ -6,7 +6,7 @@ from tensorflow.keras import models
 from CoinDetectionModelTrain import TrainModel
 
 
-class Dection:
+class DectionPrediction:
     def __init__(self) -> None:
         self.train_model = TrainModel()
         self.label_list = self.train_model.label_list
@@ -44,6 +44,6 @@ class Dection:
 
 
 if __name__ == "__main__":
-    dection = Dection()
+    dection = DectionPrediction()
     dection.predict_random_image(num_of_prediction=11)
     dection.show_predict_image()

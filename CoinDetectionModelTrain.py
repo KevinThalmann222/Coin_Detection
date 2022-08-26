@@ -18,16 +18,16 @@ class TrainModel:
     def process_image(self, image, size, show_image=False):
         read_image = cv2.imread(str(image))
         resize_image = cv2.resize(read_image, size)
-        blur_image = cv2.GaussianBlur(resize_image, (5, 5), 1)
-        erosion = cv2.erode(blur_image, np.ones((1, 1)), iterations=1)
-        dilate = cv2.dilate(erosion, np.ones((1, 1)), iterations=8)  # erweitern
+        # blur_image = cv2.GaussianBlur(resize_image, (5, 5), 1)
+        # erosion = cv2.erode(blur_image, np.ones((1, 1)), iterations=1)
+        # dilate = cv2.dilate(erosion, np.ones((1, 1)), iterations=8)  # erweitern
 
         if show_image:
             plt.subplot(1, 2, 1)
-            plt.imshow(dilate)
+            plt.imshow(resize_image)
             plt.show()
 
-        return blur_image / 255
+        return resize_image / 255
 
     def get_train_datas(self):
         train_datas = []
@@ -74,19 +74,36 @@ class TrainModel:
 
     def create_model(self):
         model = models.Sequential()
-        model.add(layers.Conv2D(128, (4, 4), activation="relu", input_shape=(self.image_size[0], self.image_size[1], 3)))
-        model.add(layers.MaxPool2D((2, 2)))
-        model.add(layers.Conv2D(256, (3, 3), activation="relu"))
-        model.add(layers.MaxPool2D((2, 2)))
-        model.add(layers.Conv2D(256, (3, 3), activation="relu"))
-        model.add(layers.MaxPool2D((2, 2)))
-        model.add(layers.Conv2D(256, (3, 3), activation="relu"))
+
+        model.add(layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu", input_shape=(self.image_size[0], self.image_size[1], 3)))
+        model.add(layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.MaxPool2D(pool_size=2, strides=2, padding="same"))
+
+        model.add(layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.MaxPool2D(pool_size=2, strides=2, padding="same"))
+
+        model.add(layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.MaxPool2D(pool_size=2, strides=2, padding="same"))
+
+        model.add(layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.MaxPool2D(pool_size=2, strides=2, padding="same"))
+
+        model.add(layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
+        model.add(layers.MaxPool2D(pool_size=2, strides=2, padding="same"))
 
         model.add(layers.Flatten())
-        model.add(layers.Dense(258, activation="relu"))
-        model.add(layers.Dense(128, activation="relu"))
-        model.add(layers.Dense(64, activation="relu"))
-        model.add(layers.Dense(6, activation="softmax"))
+        model.add(layers.Dense(units=4096, activation="relu"))
+        # model.add(layers.Dense(units=1000, activation="relu"))
+        # model.add(layers.Dropout(rate=0.2))
+        model.add(layers.Dense(units=6, activation="softmax"))
+
         model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
         train_data, train_label = self.get_train_datas()
